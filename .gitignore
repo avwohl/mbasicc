@@ -1,0 +1,26 @@
+# Build artifacts
+*.o
+*.a
+/mbasicc
+/mbasic
+/test_lexer
+
+# Editor backups
+*~
+*.swp
+*.swo
+
+# Test files
+*.tmp
+test.txt
+testfile.txt
+testrand.dat
+todo.txt
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# macOS
+.DS_Store

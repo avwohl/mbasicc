@@ -1,0 +1,250 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libedit-dev dpkg-dev
+
+      - name: Build
+        run: make
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create .deb package
+        run: |
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          PKG_NAME=mbasicc
+          PKG_DIR=${PKG_NAME}_${VERSION}_amd64
+
+          mkdir -p ${PKG_DIR}/DEBIAN
+          mkdir -p ${PKG_DIR}/usr/bin
+          mkdir -p ${PKG_DIR}/usr/share/doc/${PKG_NAME}
+          mkdir -p ${PKG_DIR}/usr/share/man/man1
+
+          cp mbasicc ${PKG_DIR}/usr/bin/
+          cp README.md ${PKG_DIR}/usr/share/doc/${PKG_NAME}/
+          cp LICENSE ${PKG_DIR}/usr/share/doc/${PKG_NAME}/copyright
+          cp man/mbasicc.1 ${PKG_DIR}/usr/share/man/man1/
+          gzip -9 ${PKG_DIR}/usr/share/man/man1/mbasicc.1
+
+          cat > ${PKG_DIR}/DEBIAN/control << EOF
+          Package: ${PKG_NAME}
+          Version: ${VERSION}
+          Section: interpreters
+          Priority: optional
+          Architecture: amd64
+          Depends: libedit2, libc6
+          Maintainer: MBASIC Maintainers <mbasic@example.com>
+          Description: MBASIC 5.21 Compatible Interpreter
+           A C++ implementation of the classic MBASIC 5.21 interpreter.
+           Features include line-number based BASIC programming, interactive
+           REPL, file I/O, arrays, user-defined functions, and more.
+          EOF
+
+          # Fix control file formatting (remove leading spaces)
+          sed -i 's/^          //' ${PKG_DIR}/DEBIAN/control
+
+          dpkg-deb --build ${PKG_DIR}
+
+      - name: Upload .deb artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-package
+          path: '*.deb'
+
+  build-rpm:
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          dnf install -y gcc-c++ make libedit-devel rpm-build
+
+      - name: Build
+        run: make
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create RPM package
+        run: |
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+
+          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+
+          # Create tarball
+          mkdir -p mbasicc-${VERSION}
+          cp -r src include man Makefile README.md LICENSE mbasicc-${VERSION}/
+          tar czf ~/rpmbuild/SOURCES/mbasicc-${VERSION}.tar.gz mbasicc-${VERSION}
+
+          # Create spec file
+          cat > ~/rpmbuild/SPECS/mbasicc.spec << 'SPECEOF'
+          Name:           mbasicc
+          Version:        ${VERSION}
+          Release:        1%{?dist}
+          Summary:        MBASIC 5.21 Compatible Interpreter
+
+          License:        MIT
+          URL:            https://github.com/jwoehr/mbasic_cc
+          Source0:        %{name}-%{version}.tar.gz
+
+          BuildRequires:  gcc-c++ make libedit-devel
+          Requires:       libedit
+
+          %description
+          A C++ implementation of the classic MBASIC 5.21 interpreter.
+          Features include line-number based BASIC programming, interactive
+          REPL, file I/O, arrays, user-defined functions, and more.
+
+          %prep
+          %setup -q
+
+          %build
+          make %{?_smp_mflags}
+
+          %install
+          mkdir -p %{buildroot}%{_bindir}
+          mkdir -p %{buildroot}%{_docdir}/%{name}
+          mkdir -p %{buildroot}%{_mandir}/man1
+          install -m 755 mbasicc %{buildroot}%{_bindir}/
+          install -m 644 README.md %{buildroot}%{_docdir}/%{name}/
+          install -m 644 LICENSE %{buildroot}%{_docdir}/%{name}/
+          install -m 644 man/mbasicc.1 %{buildroot}%{_mandir}/man1/
+
+          %files
+          %license LICENSE
+          %doc README.md
+          %{_bindir}/mbasicc
+          %{_mandir}/man1/mbasicc.1*
+
+          %changelog
+          * $(date "+%a %b %d %Y") MBASIC Maintainers <mbasic@example.com> - ${VERSION}-1
+          - Release ${VERSION}
+          SPECEOF
+
+          # Substitute version in spec file
+          sed -i "s/\${VERSION}/${VERSION}/g" ~/rpmbuild/SPECS/mbasicc.spec
+
+          rpmbuild -bb ~/rpmbuild/SPECS/mbasicc.spec
+
+          cp ~/rpmbuild/RPMS/*/*.rpm .
+
+      - name: Upload .rpm artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpm-package
+          path: '*.rpm'
+
+  build-tarball:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libedit-dev
+
+      - name: Build
+        run: make
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create source tarball
+        run: |
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          mkdir -p mbasicc-${VERSION}
+          cp -r src include man Makefile README.md LICENSE CHANGELOG.md mbasicc-${VERSION}/
+          tar czf mbasicc-${VERSION}-src.tar.gz mbasicc-${VERSION}
+
+      - name: Create binary tarball
+        run: |
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          mkdir -p mbasicc-${VERSION}-linux-amd64
+          cp mbasicc README.md LICENSE man/mbasicc.1 mbasicc-${VERSION}-linux-amd64/
+          tar czf mbasicc-${VERSION}-linux-amd64.tar.gz mbasicc-${VERSION}-linux-amd64
+
+      - name: Upload tarballs
+        uses: actions/upload-artifact@v4
+        with:
+          name: tarballs
+          path: '*.tar.gz'
+
+  create-release:
+    needs: [build-deb, build-rpm, build-tarball]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: MBASICC v${{ steps.get_version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/deb-package/*.deb
+            artifacts/rpm-package/*.rpm
+            artifacts/tarballs/*.tar.gz
+          body: |
+            ## MBASICC v${{ steps.get_version.outputs.VERSION }}
+
+            ### Installation
+
+            **Debian/Ubuntu:**
+            ```bash
+            sudo dpkg -i mbasicc_${{ steps.get_version.outputs.VERSION }}_amd64.deb
+            sudo apt-get install -f  # Install dependencies if needed
+            ```
+
+            **Fedora/RHEL/CentOS:**
+            ```bash
+            sudo rpm -i mbasicc-${{ steps.get_version.outputs.VERSION }}-1.*.rpm
+            ```
+
+            **From source:**
+            ```bash
+            tar xzf mbasicc-${{ steps.get_version.outputs.VERSION }}-src.tar.gz
+            cd mbasicc-${{ steps.get_version.outputs.VERSION }}
+            make
+            sudo cp mbasicc /usr/local/bin/
+            ```
+
+            **Pre-built binary (Linux x86_64):**
+            ```bash
+            tar xzf mbasicc-${{ steps.get_version.outputs.VERSION }}-linux-amd64.tar.gz
+            sudo cp mbasicc-${{ steps.get_version.outputs.VERSION }}-linux-amd64/mbasicc /usr/local/bin/
+            ```
+
+            ### Changes
+            See CHANGELOG.md for details.

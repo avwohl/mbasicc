@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libedit-dev
+
+      - name: Build
+        run: make
+
+      - name: Run tests
+        run: |
+          echo '10 PRINT "Hello, World!"
+          20 END' > /tmp/hello.bas
+          ./mbasicc /tmp/hello.bas | grep -q "Hello, World!" && echo "Basic test passed"
+
+  build-fedora:
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: dnf install -y gcc-c++ make libedit-devel
+
+      - name: Build
+        run: make
+
+      - name: Run tests
+        run: |
+          echo '10 PRINT "Hello, World!"
+          20 END' > /tmp/hello.bas
+          ./mbasicc /tmp/hello.bas | grep -q "Hello, World!" && echo "Basic test passed"
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build
+        run: make
+
+      - name: Run tests
+        run: |
+          echo '10 PRINT "Hello, World!"
+          20 END' > /tmp/hello.bas
+          ./mbasicc /tmp/hello.bas | grep -q "Hello, World!" && echo "Basic test passed"

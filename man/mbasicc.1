@@ -1,0 +1,133 @@
+.TH MBASICC 1 "December 2025" "mbasicc 1.0" "User Commands"
+.SH NAME
+mbasicc \- MBASIC 5.21 interpreter written in C++
+.SH SYNOPSIS
+.B mbasicc
+[\fIOPTIONS\fR] [\fIFILENAME\fR]
+.SH DESCRIPTION
+.B mbasicc
+is a C++ implementation of Microsoft BASIC-80 version 5.21.
+It can run BASIC programs from files or provide an interactive REPL
+(Read-Eval-Print Loop) environment.
+.PP
+If no filename is provided, mbasicc enters interactive mode where
+you can type BASIC commands directly.
+.SH OPTIONS
+.TP
+.B \-\-run, \-r
+Run the program (default behavior when a file is provided).
+.TP
+.B \-\-parse
+Parse the program and display the AST structure without executing.
+.TP
+.B \-\-tokenize, \-t
+Tokenize the program and display the token stream without parsing or executing.
+.TP
+.B \-\-help, \-h
+Display help message and exit.
+.SH INTERACTIVE COMMANDS
+When running without a file argument, mbasicc provides an interactive
+BASIC environment with the following commands:
+.TP
+.B NEW
+Clear the program from memory.
+.TP
+.B RUN
+Execute the current program.
+.TP
+.B LIST \fR[\fIn\fR[\fI-m\fR]]
+List program lines. Optionally specify a range.
+.TP
+.B LOAD \fR"\fIfilename\fR"
+Load a program from disk.
+.TP
+.B SAVE \fR"\fIfilename\fR"
+Save the current program to disk.
+.TP
+.B FILES \fR[\fIpattern\fR]
+List files matching pattern (default: *.bas).
+.TP
+.B AUTO \fR[\fIstart\fR[\fI,step\fR]]
+Enter automatic line numbering mode.
+.TP
+.B EDIT \fIline\fR
+Edit an existing program line.
+.TP
+.B DELETE \fIline\fR[\fI-line\fR]
+Delete program lines.
+.TP
+.B RENUM \fR[\fInew\fR[\fI,old\fR[\fI,inc\fR]]]
+Renumber program lines.
+.TP
+.B CONT
+Continue execution after STOP or BREAK.
+.TP
+.B TRON, TROFF
+Enable or disable trace mode.
+.TP
+.B SYSTEM, QUIT, EXIT
+Exit the interpreter.
+.SH EXAMPLES
+Run a BASIC program:
+.PP
+.RS
+.nf
+mbasicc program.bas
+.fi
+.RE
+.PP
+Start interactive REPL:
+.PP
+.RS
+.nf
+mbasicc
+.fi
+.RE
+.PP
+Tokenize a program:
+.PP
+.RS
+.nf
+mbasicc --tokenize program.bas
+.fi
+.RE
+.SH FILES
+.TP
+.I *.bas
+BASIC source files (ASCII text with line numbers).
+.SH COMPATIBILITY
+This implementation supports most MBASIC 5.21 features including:
+.IP \(bu 2
+Program flow control (FOR/NEXT, WHILE/WEND, GOSUB/RETURN, GOTO, IF/THEN/ELSE)
+.IP \(bu 2
+All data types (INTEGER %, SINGLE !, DOUBLE #, STRING $)
+.IP \(bu 2
+Mathematical and string functions
+.IP \(bu 2
+Array handling (DIM, multi-dimensional arrays)
+.IP \(bu 2
+User-defined functions (DEF FN)
+.IP \(bu 2
+Sequential and random file I/O
+.IP \(bu 2
+Error handling (ON ERROR GOTO, RESUME)
+.IP \(bu 2
+PRINT USING formatted output
+.PP
+Hardware-specific features (PEEK, POKE, INP, OUT, USR) are implemented
+as stubs for compatibility.
+.SH BUGS
+Report bugs at:
+.PP
+.RS
+https://github.com/jwoehr/mbasic_cc/issues
+.RE
+.SH AUTHOR
+Written as part of the mbasic_cc project.
+.SH COPYRIGHT
+Copyright \(co 2025. Licensed under the GNU General Public License v3.0.
+.SH SEE ALSO
+.PP
+Project repository: https://github.com/jwoehr/mbasic_cc
+.PP
+BASIC-80 Reference Manual v5.21 (AA-P226A-TV)
