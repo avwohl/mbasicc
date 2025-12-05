@@ -47,7 +47,7 @@ namespace ErrorCode {
     constexpr int RETURN_WITHOUT_GOSUB = 3;
     constexpr int OUT_OF_DATA = 4;
     constexpr int ILLEGAL_FUNCTION_CALL = 5;
-    constexpr int OVERFLOW = 6;
+    constexpr int OVERFLOW_ERROR = 6;
     constexpr int OUT_OF_MEMORY = 7;
     constexpr int UNDEFINED_LINE = 8;
     constexpr int SUBSCRIPT_OUT_OF_RANGE = 9;
@@ -92,7 +92,7 @@ inline std::string error_message(int code) {
         case ErrorCode::RETURN_WITHOUT_GOSUB: return "RETURN without GOSUB";
         case ErrorCode::OUT_OF_DATA: return "Out of DATA";
         case ErrorCode::ILLEGAL_FUNCTION_CALL: return "Illegal function call";
-        case ErrorCode::OVERFLOW: return "Overflow";
+        case ErrorCode::OVERFLOW_ERROR: return "Overflow";
         case ErrorCode::OUT_OF_MEMORY: return "Out of memory";
         case ErrorCode::UNDEFINED_LINE: return "Undefined line number";
         case ErrorCode::SUBSCRIPT_OUT_OF_RANGE: return "Subscript out of range";
