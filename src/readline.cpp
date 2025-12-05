@@ -22,7 +22,12 @@ namespace mbasic {
 static std::string g_prefill_text;
 
 // Pre-input hook for readline - inserts text before user input
+// macOS editline uses (const char*, int) signature, GNU readline uses (void)
+#ifdef __APPLE__
+static int prefill_hook(const char*, int) {
+#else
 static int prefill_hook() {
+#endif
     if (!g_prefill_text.empty()) {
         rl_insert_text(g_prefill_text.c_str());
         g_prefill_text.clear();
