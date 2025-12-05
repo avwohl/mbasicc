@@ -2,9 +2,9 @@
 
 A modern C++ implementation of Microsoft BASIC-80 version 5.21.
 
-**Repository:** https://github.com/jwoehr/mbasic_cc
+**Repository:** https://github.com/avwohl/mbasicc
 
-[![CI](https://github.com/jwoehr/mbasic_cc/actions/workflows/ci.yml/badge.svg)](https://github.com/jwoehr/mbasic_cc/actions/workflows/ci.yml)
+[![CI](https://github.com/avwohl/mbasicc/actions/workflows/ci.yml/badge.svg)](https://github.com/avwohl/mbasicc/actions/workflows/ci.yml)
 
 ## Installation
 
@@ -41,8 +41,8 @@ sudo cp mbasicc-X.Y.Z-linux-amd64/mbasicc /usr/local/bin/
 **Debian/Ubuntu:**
 ```bash
 sudo apt-get install build-essential libedit-dev
-git clone https://github.com/jwoehr/mbasic_cc.git
-cd mbasic_cc
+git clone https://github.com/avwohl/mbasicc.git
+cd mbasicc
 make
 sudo cp mbasicc /usr/local/bin/
 ```
@@ -50,8 +50,8 @@ sudo cp mbasicc /usr/local/bin/
 **Fedora/RHEL:**
 ```bash
 sudo dnf install gcc-c++ make libedit-devel
-git clone https://github.com/jwoehr/mbasic_cc.git
-cd mbasic_cc
+git clone https://github.com/avwohl/mbasicc.git
+cd mbasicc
 make
 sudo cp mbasicc /usr/local/bin/
 ```
@@ -59,8 +59,8 @@ sudo cp mbasicc /usr/local/bin/
 **macOS:**
 ```bash
 # libedit is included in macOS
-git clone https://github.com/jwoehr/mbasic_cc.git
-cd mbasic_cc
+git clone https://github.com/avwohl/mbasicc.git
+cd mbasicc
 make
 sudo cp mbasicc /usr/local/bin/
 ```
@@ -162,7 +162,7 @@ These hardware-specific features are implemented as stubs that return 0 or do no
 ## Project Structure
 
 ```
-mbasic_cc/
+mbasicc/
 ├── include/mbasic/      # Header files
 │   ├── ast.hpp          # Abstract Syntax Tree definitions
 │   ├── error.hpp        # Error codes and messages

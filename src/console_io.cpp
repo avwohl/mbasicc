@@ -1,5 +1,5 @@
 // MBASICC - MBASIC 5.21 C++ Interpreter
-// https://github.com/jwoehr/mbasic_cc
+// https://github.com/avwohl/mbasicc
 //
 // ConsoleIO Implementation - Standard console I/O using std::cin/std::cout
 

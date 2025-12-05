@@ -7,7 +7,7 @@ This document describes the architecture for a C++ implementation of an MBASIC 5
 ## Project Structure
 
 ```
-mbasic_cc/
+mbasicc/
 ├── CMakeLists.txt              # Build configuration
 ├── include/
 │   └── mbasic/

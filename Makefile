@@ -1,5 +1,5 @@
 # MBASIC 5.21 C++ Interpreter Makefile
-# https://github.com/jwoehr/mbasic_cc
+# https://github.com/avwohl/mbasicc
 
 CXX := g++
 CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -O2

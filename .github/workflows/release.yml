@@ -103,7 +103,7 @@ jobs:
           Summary:        MBASIC 5.21 Compatible Interpreter
 
           License:        MIT
-          URL:            https://github.com/jwoehr/mbasic_cc
+          URL:            https://github.com/avwohl/mbasicc
           Source0:        %{name}-%{version}.tar.gz
 
           BuildRequires:  gcc-c++ make libedit-devel

@@ -1,6 +1,6 @@
 #pragma once
 // MBASICC - MBASIC 5.21 C++ Interpreter
-// https://github.com/jwoehr/mbasic_cc
+// https://github.com/avwohl/mbasicc
 //
 // File Handler Abstraction
 // This interface allows the interpreter's file I/O to be portable across

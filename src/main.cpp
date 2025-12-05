@@ -941,8 +941,8 @@ int main(int argc, char* argv[]) {
             std::cout << "  LOAD \"file\"     Load program from file\n";
             std::cout << "  SAVE \"file\"     Save program to file\n";
             std::cout << "  SYSTEM          Exit interpreter\n";
-            std::cout << "\nRepository: https://github.com/jwoehr/mbasic_cc\n";
-            std::cout << "Report bugs: https://github.com/jwoehr/mbasic_cc/issues\n";
+            std::cout << "\nRepository: https://github.com/avwohl/mbasicc\n";
+            std::cout << "Report bugs: https://github.com/avwohl/mbasicc/issues\n";
             return 0;
         } else {
             std::cerr << "Unknown option: " << flag << "\n";
