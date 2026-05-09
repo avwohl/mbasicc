@@ -20,8 +20,11 @@ static bool float_equal(double a, double b) {
     // Handle exact equality (including infinities)
     if (a == b) return true;
 
+    // std::max instead of std::fmax (which DJGPP libc doesn't ship). Inputs are
+    // absolute values of finite doubles, so the C99 NaN-handling distinction
+    // between max and fmax doesn't apply here.
     double diff = std::fabs(a - b);
-    double larger = std::fmax(std::fabs(a), std::fabs(b));
+    double larger = std::max(std::fabs(a), std::fabs(b));
 
     // Use relative tolerance scaled by the larger magnitude
     // Single-precision epsilon is about 1.19e-7, we use a slightly larger tolerance
@@ -29,7 +32,7 @@ static bool float_equal(double a, double b) {
     constexpr double rel_epsilon = 1e-6;
     constexpr double abs_epsilon = 1e-9;
 
-    return diff <= std::fmax(abs_epsilon, larger * rel_epsilon);
+    return diff <= std::max(abs_epsilon, larger * rel_epsilon);
 }
 
 // ============================================================================

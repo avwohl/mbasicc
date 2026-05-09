@@ -28,7 +28,9 @@ AR  := $(CROSS_PREFIX)ar
 # DJGPP gcc supports C++17 from gcc 7+ (current builds ship gcc 12).
 # -DMBASIC_NO_EDITLINE selects the std::getline fallback path in readline.cpp,
 # avoiding any editline/readline dependency.
-CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -O2 -DMBASIC_NO_EDITLINE
+# -std=gnu++17 (rather than -std=c++17) is required so that DJGPP's <dir.h>
+# exposes findfirst/findnext - strict ANSI mode hides them.
+CXXFLAGS := -std=gnu++17 -Wall -Wextra -Wpedantic -O2 -DMBASIC_NO_EDITLINE
 INCLUDES := -Iinclude
 
 # Source files - identical set to the POSIX build, just compiled differently.

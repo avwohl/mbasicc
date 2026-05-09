@@ -59,8 +59,9 @@ inline int16_t to_integer(const Value& v) {
     // MBASIC uses banker's rounding (round half to even)
     if (d >= 32767.5) return 32767;
     if (d <= -32768.5) return -32768;
-    // Use rint which respects the current rounding mode (default is round to nearest even)
-    return static_cast<int16_t>(std::rint(d));
+    // Use rint which respects the current rounding mode (default is round to nearest even).
+    // ::rint (C global) is used because some libstdc++ ports (e.g. DJGPP) don't put rint into std::.
+    return static_cast<int16_t>(::rint(d));
 }
 
 // Convert value to string representation

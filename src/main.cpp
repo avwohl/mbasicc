@@ -6,6 +6,9 @@
 #include <cctype>
 #include <cstdlib>
 #include <cstring>
+#if defined(__DJGPP__)
+#include <dir.h>  // findfirst/findnext for FILES command
+#endif
 #include "mbasic/readline.hpp"
 #include "mbasic/lexer.hpp"
 #include "mbasic/parser.hpp"
@@ -640,15 +643,22 @@ void run_repl() {
             if (pattern.empty()) {
                 pattern = "*.bas";  // Default pattern
             }
-#if defined(__DJGPP__) || defined(_WIN32) || defined(_WIN64)
-            // DOS/Windows: use DIR with /B for bare format
-            std::string cmd = "dir /B " + pattern + " 2>NUL";
-            FILE* pipe = popen(cmd.c_str(), "r");
+#if defined(__DJGPP__)
+            // DJGPP: use findfirst/findnext directly (no popen on DOS)
+            struct ffblk ff;
+            int done = findfirst(pattern.c_str(), &ff, FA_RDONLY | FA_ARCH);
+            while (done == 0) {
+                std::cout << ff.ff_name << "\n";
+                done = findnext(&ff);
+            }
 #else
-            // POSIX: use ls
+            // POSIX/Windows: shell out to ls or dir
+#  if defined(_WIN32) || defined(_WIN64)
+            std::string cmd = "dir /B " + pattern + " 2>NUL";
+#  else
             std::string cmd = "ls -1 " + pattern + " 2>/dev/null";
+#  endif
             FILE* pipe = popen(cmd.c_str(), "r");
-#endif
             if (pipe) {
                 char buffer[256];
                 while (fgets(buffer, sizeof(buffer), pipe)) {
@@ -656,6 +666,7 @@ void run_repl() {
                 }
                 pclose(pipe);
             }
+#endif
         } else if (first_word == "AUTO") {
             // AUTO command - automatic line numbering
             int auto_start = 10;

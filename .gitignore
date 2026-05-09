@@ -2,8 +2,10 @@
 *.o
 *.a
 /mbasicc
+/mbasicc.exe
 /mbasic
 /test_lexer
+/build/
 
 # Editor backups
 *~
