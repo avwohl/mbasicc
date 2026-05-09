@@ -60,3 +60,39 @@ jobs:
           echo '10 PRINT "Hello, World!"
           20 END' > /tmp/hello.bas
           ./mbasicc /tmp/hello.bas | grep -q "Hello, World!" && echo "Basic test passed"
+
+  build-freedos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install DJGPP cross toolchain
+        run: |
+          # Pre-built DJGPP cross-compiler for linux64 (gcc 12.2.0)
+          # See https://github.com/andrewwutw/build-djgpp/releases
+          DJGPP_VERSION=v3.4
+          DJGPP_TARBALL=djgpp-linux64-gcc1220.tar.bz2
+          curl -L -o /tmp/djgpp.tar.bz2 \
+            "https://github.com/andrewwutw/build-djgpp/releases/download/${DJGPP_VERSION}/${DJGPP_TARBALL}"
+          sudo mkdir -p /opt
+          sudo tar -xjf /tmp/djgpp.tar.bz2 -C /opt
+          echo "/opt/djgpp/bin" >> "$GITHUB_PATH"
+
+      - name: Verify toolchain
+        run: i586-pc-msdosdjgpp-g++ --version
+
+      - name: Build mbasicc.exe
+        run: make -f Makefile.djgpp
+
+      - name: Verify output is a DJGPP DOS executable
+        run: |
+          file mbasicc.exe
+          file mbasicc.exe | grep -q "MS-DOS executable" \
+            || (echo "Output is not a DOS executable" && exit 1)
+
+      - name: Upload mbasicc.exe artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mbasicc-freedos
+          path: mbasicc.exe

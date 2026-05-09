@@ -67,12 +67,39 @@ sudo cp mbasicc /usr/local/bin/
 
 ### Building Without editline
 
-If libedit is not available on your system, edit `src/readline.cpp`:
-1. Comment out the "EDITLINE IMPLEMENTATION" section
-2. Uncomment the "FALLBACK IMPLEMENTATION" section
-3. Remove `-ledit` from `LDFLAGS` in the Makefile
+If libedit is not available on your system, build with `-DMBASIC_NO_EDITLINE`
+and drop `-ledit` from the link line. For example:
+
+```bash
+make CXXFLAGS="-std=c++17 -O2 -DMBASIC_NO_EDITLINE" LDFLAGS=
+```
 
 This provides basic line input without history or line editing features.
+
+### FreeDOS / DJGPP
+
+`Makefile.djgpp` cross-compiles a 32-bit DJGPP `mbasicc.exe` that runs on
+FreeDOS, MS-DOS, and DOSBox. The build automatically uses the editline-free
+fallback (no extra dependencies).
+
+**Cross-compile from Linux/macOS:**
+```bash
+# Install the DJGPP cross-compiler toolchain (one-time):
+#   Linux: download from https://github.com/andrewwutw/build-djgpp/releases
+#          and prepend its bin/ directory to PATH
+#   macOS: brew install andrewwutw/extras/djgpp
+make -f Makefile.djgpp
+# Output: mbasicc.exe
+```
+
+**Native build under FreeDOS** (with DJGPP installed):
+```bash
+make -f Makefile.djgpp CROSS_PREFIX=
+```
+
+The CI builds this target on every push and uploads `mbasicc.exe` as an
+artifact. To run the resulting binary, copy `mbasicc.exe` (and `cwsdpmi.exe`,
+shipped with DJGPP, if needed) to your FreeDOS system.
 
 ---
 

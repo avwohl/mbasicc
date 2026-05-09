@@ -1,17 +1,20 @@
 // readline.cpp - Wrapper for editline/readline library
 //
 // This file isolates all editline/readline dependencies.
-// To port to a system without editline:
-//   1. Replace the implementations below with simple std::getline() calls
-//   2. Remove -ledit from LDFLAGS in Makefile
-//   3. Or implement using a different line-editing library
+//
+// Build options:
+//   - Default: uses editline/readline (link with -ledit)
+//   - Define MBASIC_NO_EDITLINE: uses std::getline fallback
+//     (no history, no line editing). Used by FreeDOS/DJGPP, WebAssembly,
+//     and any platform without editline available.
 
 #include "mbasic/readline.hpp"
 #include <cstdlib>
 
+#ifndef MBASIC_NO_EDITLINE
+
 // ============================================================================
 // EDITLINE IMPLEMENTATION
-// Comment out this section and uncomment FALLBACK below if editline unavailable
 // ============================================================================
 
 #include <editline/readline.h>
@@ -74,12 +77,12 @@ void readline_add_history(const std::string& line) {
 
 } // namespace mbasic
 
+#else // MBASIC_NO_EDITLINE
+
 // ============================================================================
 // FALLBACK IMPLEMENTATION (no editline)
-// Uncomment this section and comment out EDITLINE above if needed
 // ============================================================================
 
-/*
 #include <iostream>
 
 namespace mbasic {
@@ -123,4 +126,5 @@ void readline_add_history(const std::string& line) {
 }
 
 } // namespace mbasic
-*/
+
+#endif // MBASIC_NO_EDITLINE

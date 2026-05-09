@@ -1,0 +1,72 @@
+# MBASIC 5.21 C++ Interpreter - FreeDOS / DJGPP Cross-Compile Makefile
+# https://github.com/avwohl/mbasicc
+#
+# This Makefile cross-compiles mbasicc to a 32-bit DJGPP DOS executable
+# that runs on FreeDOS, MS-DOS, and DOSBox.
+#
+# Requirements:
+#   - DJGPP cross-compiler (i586-pc-msdosdjgpp-g++)
+#     macOS: brew install andrewwutw/extras/djgpp     (community tap)
+#     Linux: download from https://github.com/andrewwutw/build-djgpp/releases
+#            and prepend the bin directory to PATH
+#
+# Usage:
+#   make -f Makefile.djgpp           # Build mbasicc.exe
+#   make -f Makefile.djgpp clean     # Remove build artifacts
+#
+# Native build under FreeDOS:
+#   Override CXX, e.g.: make -f Makefile.djgpp CXX=gpp
+#
+# The output mbasicc.exe is a self-contained DJGPP COFF executable that
+# bundles the CWSDPMI DPMI host (or expects cwsdpmi.exe alongside it).
+
+# Cross-compiler prefix - override on command line for native builds
+CROSS_PREFIX ?= i586-pc-msdosdjgpp-
+CXX := $(CROSS_PREFIX)g++
+AR  := $(CROSS_PREFIX)ar
+
+# DJGPP gcc supports C++17 from gcc 7+ (current builds ship gcc 12).
+# -DMBASIC_NO_EDITLINE selects the std::getline fallback path in readline.cpp,
+# avoiding any editline/readline dependency.
+CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -O2 -DMBASIC_NO_EDITLINE
+INCLUDES := -Iinclude
+
+# Source files - identical set to the POSIX build, just compiled differently.
+LIB_CORE_SRCS := src/value.cpp src/tokens.cpp src/lexer.cpp src/error.cpp \
+                 src/ast.cpp src/parser.cpp src/runtime.cpp src/interpreter.cpp
+LIB_IO_SRCS   := src/console_io.cpp src/file_handler.cpp src/readline.cpp
+MAIN_SRC      := src/main.cpp
+
+# DJGPP build objects live in a separate directory so they don't collide with
+# any host-built .o files in src/.
+BUILDDIR := build/djgpp
+
+LIB_CORE_OBJS := $(patsubst src/%.cpp,$(BUILDDIR)/%.o,$(LIB_CORE_SRCS))
+LIB_IO_OBJS   := $(patsubst src/%.cpp,$(BUILDDIR)/%.o,$(LIB_IO_SRCS))
+MAIN_OBJ      := $(patsubst src/%.cpp,$(BUILDDIR)/%.o,$(MAIN_SRC))
+ALL_OBJS      := $(LIB_CORE_OBJS) $(LIB_IO_OBJS) $(MAIN_OBJ)
+
+TARGET := mbasicc.exe
+
+.PHONY: all clean check-toolchain
+
+all: check-toolchain $(TARGET)
+
+check-toolchain:
+	@command -v $(CXX) >/dev/null 2>&1 || { \
+	  echo "Error: $(CXX) not found in PATH."; \
+	  echo "Install the DJGPP cross toolchain or override CROSS_PREFIX="; \
+	  echo "(set CROSS_PREFIX= for a native FreeDOS build with gpp/gcc)."; \
+	  exit 1; }
+
+$(TARGET): $(ALL_OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+$(BUILDDIR)/%.o: src/%.cpp | $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+$(BUILDDIR):
+	mkdir -p $(BUILDDIR)
+
+clean:
+	rm -rf $(BUILDDIR) $(TARGET)

@@ -640,9 +640,15 @@ void run_repl() {
             if (pattern.empty()) {
                 pattern = "*.bas";  // Default pattern
             }
-            // Use system ls command with glob
+#if defined(__DJGPP__) || defined(_WIN32) || defined(_WIN64)
+            // DOS/Windows: use DIR with /B for bare format
+            std::string cmd = "dir /B " + pattern + " 2>NUL";
+            FILE* pipe = popen(cmd.c_str(), "r");
+#else
+            // POSIX: use ls
             std::string cmd = "ls -1 " + pattern + " 2>/dev/null";
             FILE* pipe = popen(cmd.c_str(), "r");
+#endif
             if (pipe) {
                 char buffer[256];
                 while (fgets(buffer, sizeof(buffer), pipe)) {
