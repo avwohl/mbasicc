@@ -7,7 +7,7 @@ for bas in "$TEST_DIR"/*.bas; do
     name=$(basename "$bas" .bas)
     expected="$TEST_DIR/${name}.txt"
     if [ -f "$expected" ]; then
-        actual=$(./mbasic "$bas" 2>&1 | sed 's/[[:space:]]*$//')
+        actual=$(./mbasicc "$bas" 2>&1 | sed 's/[[:space:]]*$//')
         expected_content=$(cat "$expected" | sed 's/[[:space:]]*$//')
         if [ "$actual" = "$expected_content" ]; then
             echo "PASS: $name"
