@@ -10,31 +10,46 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# Main library
-add_library(mbasic_lib
+# Portable core (no platform I/O - this is the subset usable for WASM builds).
+# Built as libmbasic.a, the same library "make lib" produces.
+add_library(mbasic_core
     src/value.cpp
     src/tokens.cpp
     src/lexer.cpp
     src/error.cpp
+    src/ast.cpp
+    src/parser.cpp
+    src/runtime.cpp
+    src/interpreter.cpp
 )
+set_target_properties(mbasic_core PROPERTIES OUTPUT_NAME mbasic)
+target_include_directories(mbasic_core PUBLIC include)
 
-target_include_directories(mbasic_lib PUBLIC include)
+# Platform-specific I/O implementations, on top of the portable core
+add_library(mbasic_lib
+    src/console_io.cpp
+    src/file_handler.cpp
+    src/readline.cpp
+)
+target_link_libraries(mbasic_lib PUBLIC mbasic_core)
 
-# Main executable
-add_executable(mbasic src/main.cpp)
-target_link_libraries(mbasic mbasic_lib)
-
-# Check for readline
-find_library(READLINE_LIBRARY readline)
-if(READLINE_LIBRARY)
-    target_compile_definitions(mbasic PRIVATE HAVE_READLINE)
-    target_link_libraries(mbasic ${READLINE_LIBRARY})
+# src/readline.cpp includes <editline/readline.h> and needs libedit (-ledit).
+# Without it, the file compiles a std::getline fallback keyed off MBASIC_NO_EDITLINE.
+find_library(EDITLINE_LIBRARY edit)
+if(EDITLINE_LIBRARY)
+    target_link_libraries(mbasic_lib PUBLIC ${EDITLINE_LIBRARY})
+else()
+    target_compile_definitions(mbasic_lib PRIVATE MBASIC_NO_EDITLINE)
 endif()
+
+# Main executable (named mbasicc, as in the Makefile, the man page and README)
+add_executable(mbasicc src/main.cpp)
+target_link_libraries(mbasicc PRIVATE mbasic_lib)
 
 # Tests
 enable_testing()
 
 # Simple test runner for now
 add_executable(test_lexer tests/test_lexer.cpp)
-target_link_libraries(test_lexer mbasic_lib)
+target_link_libraries(test_lexer PRIVATE mbasic_lib)
 add_test(NAME lexer_tests COMMAND test_lexer)

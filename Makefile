@@ -43,7 +43,7 @@ libmbasic.a: $(LIB_CORE_OBJS)
 	ar rcs $@ $^
 
 test_lexer: $(LIB_OBJS) $(TEST_SRC:.cpp=.o)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Object file compilation
 %.o: %.cpp
