@@ -37,6 +37,7 @@ jobs:
 
           cp mbasicc ${PKG_DIR}/usr/bin/
           cp README.md ${PKG_DIR}/usr/share/doc/${PKG_NAME}/
+          cp -r docs ${PKG_DIR}/usr/share/doc/${PKG_NAME}/
           cp LICENSE ${PKG_DIR}/usr/share/doc/${PKG_NAME}/copyright
           cp man/mbasicc.1 ${PKG_DIR}/usr/share/man/man1/
           gzip -9 ${PKG_DIR}/usr/share/man/man1/mbasicc.1
@@ -92,7 +93,7 @@ jobs:
 
           # Create tarball
           mkdir -p mbasicc-${VERSION}
-          cp -r src include man Makefile README.md LICENSE mbasicc-${VERSION}/
+          cp -r src include man docs Makefile README.md LICENSE mbasicc-${VERSION}/
           tar czf ~/rpmbuild/SOURCES/mbasicc-${VERSION}.tar.gz mbasicc-${VERSION}
 
           # Create spec file
@@ -131,7 +132,7 @@ jobs:
 
           %files
           %license LICENSE
-          %doc README.md
+          %doc README.md docs
           %{_bindir}/mbasicc
           %{_mandir}/man1/mbasicc.1*
 
@@ -175,14 +176,14 @@ jobs:
         run: |
           VERSION=${{ steps.get_version.outputs.VERSION }}
           mkdir -p mbasicc-${VERSION}
-          cp -r src include man Makefile README.md LICENSE CHANGELOG.md mbasicc-${VERSION}/
+          cp -r src include man docs Makefile README.md LICENSE CHANGELOG.md mbasicc-${VERSION}/
           tar czf mbasicc-${VERSION}-src.tar.gz mbasicc-${VERSION}
 
       - name: Create binary tarball
         run: |
           VERSION=${{ steps.get_version.outputs.VERSION }}
           mkdir -p mbasicc-${VERSION}-linux-amd64
-          cp mbasicc README.md LICENSE man/mbasicc.1 mbasicc-${VERSION}-linux-amd64/
+          cp -r mbasicc README.md LICENSE man/mbasicc.1 docs mbasicc-${VERSION}-linux-amd64/
           tar czf mbasicc-${VERSION}-linux-amd64.tar.gz mbasicc-${VERSION}-linux-amd64
 
       - name: Upload tarballs
