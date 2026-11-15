@@ -68,13 +68,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install DJGPP cross toolchain
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          # Pre-built DJGPP cross-compiler for linux64 (gcc 12.2.0)
-          # See https://github.com/andrewwutw/build-djgpp/releases
-          DJGPP_VERSION=v3.4
-          DJGPP_TARBALL=djgpp-linux64-gcc1220.tar.bz2
-          curl -L -o /tmp/djgpp.tar.bz2 \
-            "https://github.com/andrewwutw/build-djgpp/releases/download/${DJGPP_VERSION}/${DJGPP_TARBALL}"
+          # Pre-built DJGPP cross-compiler for linux64: the latest release of
+          # https://github.com/andrewwutw/build-djgpp, no version pin.  The
+          # asset name has the GCC version in it, so match a pattern.
+          gh release download --repo andrewwutw/build-djgpp \
+            --pattern 'djgpp-linux64-gcc*.tar.bz2' --output /tmp/djgpp.tar.bz2
           sudo mkdir -p /opt
           sudo tar -xjf /tmp/djgpp.tar.bz2 -C /opt
           echo "/opt/djgpp/bin" >> "$GITHUB_PATH"
